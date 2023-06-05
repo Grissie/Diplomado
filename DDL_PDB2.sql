@@ -1,0 +1,214 @@
+--@AUTOR: GUTIERREZ SILVESTRE, MARCELINO CISNEROS
+--@FECHA CREACION: 10/04/23
+--@DESCRIPCION: CREACION DE TABLAS DE LA PDB RESTAURANTE_S2: PLATILLOS Y BEBIDAS
+
+PROMPT CREANDO TABLA CATEGORIA
+CREATE TABLE CATEGORIA
+(
+  CATEGORIA_ID      NUMBER(10,0),
+  CATEGORIA         VARCHAR2(200)   NOT NULL,
+  constraint CATEGORIA_PK primary key(CATEGORIA_ID)
+  using index
+  (
+    create unique index CATEGORIA_PK on CATEGORIA(CATEGORIA_ID)
+    tablespace ix_consumibles_tbs
+  )
+)tablespace platillos_tbs;
+
+PROMPT CREANDO TABLA RECETA
+CREATE TABLE RECETA
+(
+  RECETA_ID           NUMBER(10,0),
+  NOMBRE              VARCHAR2(200)    NOT NULL,
+  PREPARACION         VARCHAR2(500)    NOT NULL,
+  AUTOR               VARCHAR2(100)    NOT NULL,
+  GRADO_DIFICULTAD    VARCHAR2(40)     NOT NULL,
+  constraint RECETA_PK primary key(RECETA_ID)
+  using index
+  (
+    create unique index RECETA_PK on RECETA(RECETA_ID)
+    tablespace ix_consumibles_tbs
+  )
+)tablespace recetas_tbs;
+
+
+
+PROMPT CREANDO TABLA INGREDIENTE
+CREATE TABLE INGREDIENTE
+(
+  INGREDIENTE_ID    NUMBER(10,0),   
+  INGREDIENTE       VARCHAR2(50)    NOT NULL,
+  UNIDAD_MEDIDA     VARCHAR2(20)    NOT NULL,
+  CALORIAS          NUMBER(10,0)    NOT NULL,
+  constraint INGREDIENTE_PK primary key(INGREDIENTE_ID)
+  using index
+  (
+    create unique index INGREDIENTE_PK on INGREDIENTE(INGREDIENTE_ID)
+    tablespace ix_consumibles_tbs
+  )
+)tablespace recetas_tbs;
+
+
+
+PROMPT CREANDO TABLA RECETA_INGREDIENTE
+CREATE TABLE RECETA_INGREDIENTE
+(
+  RECETA_INGREDIENTE_ID       NUMBER(10,0),  
+  GLUTEN_FREE                 CHAR(1)         NOT NULL,
+  CANTIDAD                    NUMBER(10,0)    NOT NULL,
+  RECETA_ID                   NUMBER(10,0)    NOT NULL,
+  INGREDIENTE_ID              NUMBER(10,0)    NOT NULL,
+  constraint RECETA_INGREDIENTE_PK primary key(RECETA_INGREDIENTE_ID)
+  using index
+  (
+    create unique index RECETA_INGREDIENTE_PK on RECETA_INGREDIENTE(RECETA_INGREDIENTE_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT RECETA_INGREDIENTE_INGREDIENTE_ID_FK FOREIGN KEY (INGREDIENTE_ID)
+  REFERENCES INGREDIENTE(INGREDIENTE_ID),
+  CONSTRAINT RECETA_INGREDIENTE_RECETA_ID_FK FOREIGN KEY (RECETA_ID)
+  REFERENCES RECETA(RECETA_ID)
+)tablespace recetas_tbs;
+
+
+
+PROMPT CREANDO TABLA PLATILLO
+CREATE TABLE PLATILLO
+(
+  PLATILLO_ID     NUMBER(10,0),
+  NOMBRE          VARCHAR2(100)   NOT NULL,
+  COSTO           NUMBER(5,0)     NOT NULL,
+  FOTO            BLOB                NULL,
+  CATEGORIA_ID    NUMBER(10,0)    NOT NULL,
+  RECETA_ID       NUMBER(10,0)    NOT NULL,
+  constraint PLATILLO_PK primary key(PLATILLO_ID)
+  using index
+  (
+    create unique index PLATILLO_PK on PLATILLO(PLATILLO_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT PLATILLO_CATEGORIA_ID_FK FOREIGN KEY (CATEGORIA_ID)
+  REFERENCES CATEGORIA(CATEGORIA_ID),
+  CONSTRAINT PLATILLO_RECETA_ID_FK FOREIGN KEY (RECETA_ID)
+  REFERENCES RECETA(RECETA_ID)
+)tablespace platillos_tbs
+lob (FOTO) store as securefile seg_foto_p (tablespace BLOB_consumibles_tbs
+    index foto_p_blob_ix (tablespace BLOB_consumibles_tbs));
+
+
+
+PROMPT CREANDO TABLA BEBIDA
+CREATE TABLE BEBIDA
+(
+  BEBIDA_ID       NUMBER(10,0),
+  NOMBRE          VARCHAR2(100)   NOT NULL,
+  COSTO           NUMBER(5,0)     NOT NULL,
+  FOTO            BLOB                NULL,
+  RECETA_ID       NUMBER(10,0)    NOT NULL,
+  constraint BEBIDA_PK primary key(BEBIDA_ID)
+  using index
+  (
+    create unique index BEBIDA_PK on BEBIDA(BEBIDA_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT BEBIDA_RECETA_ID_FK FOREIGN KEY (RECETA_ID)
+  REFERENCES RECETA(RECETA_ID)
+)tablespace bebidas_tbs
+lob (FOTO) store as securefile seg_foto_b (tablespace BLOB_consumibles_tbs
+    index foto_b_blob_ix (tablespace BLOB_consumibles_tbs));
+
+
+
+PROMPT CREANDO TABLA COCINERO_PLATILLO
+CREATE TABLE COCINERO_PLATILLO
+(
+  COCINERO_PLATILLO_ID    NUMBER(10,0),
+  COSTO_EXTRA             VARCHAR2(10)    NOT NULL,
+  CAMBIO_INGREDIENTE      CHAR(1)         NOT NULL,
+  TIEMPO_PREPARACION_MIN  NUMBER(10,0)    NOT NULL,
+  PLATILLO_ID             NUMBER(10,0)    NOT NULL,
+  EMPLEADO_RID            NUMBER(10,0)    NOT NULL,
+  constraint COCINERO_PLATILLO_PK primary key(COCINERO_PLATILLO_ID)
+  using index
+  (
+    create unique index COCINERO_PLATILLO_PK on COCINERO_PLATILLO(COCINERO_PLATILLO_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT COCINERO_PLATILLO_PLATILLO_ID_FK FOREIGN KEY (PLATILLO_ID)
+  REFERENCES PLATILLO(PLATILLO_ID)
+)tablespace platillos_tbs;
+
+
+
+PROMPT CREANDO TABLA BARTENDER_BEBIDA
+CREATE TABLE BARTENDER_BEBIDA
+(
+  BARTENDER_BEBIDA_ID     NUMBER(10,0),
+  TIEMPO_PREPARACION_MIN  NUMBER(10,0)    NOT NULL,
+  BEBIDA_ID               NUMBER(10,0)    NOT NULL,
+  EMPLEADO_RID            NUMBER(10,0)    NOT NULL,
+  constraint BARTENDER_BEBIDA_PK primary key(BARTENDER_BEBIDA_ID)
+  using index
+  (
+    create unique index BARTENDER_BEBIDA_PK on BARTENDER_BEBIDA(BARTENDER_BEBIDA_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT BARTENDER_BEBIDA_BEBIDA_ID_FK FOREIGN KEY (BEBIDA_ID)
+  REFERENCES BEBIDA(BEBIDA_ID)
+)tablespace bebidas_tbs;
+
+
+
+PROMPT CREANDO TABLA PLATILLO_CUENTA
+CREATE TABLE PLATILLO_CUENTA
+(
+  PLATILLO_CUENTA_ID             NUMBER(10,0),
+  CANTIDAD                       NUMBER(10,0)    NOT NULL,
+  CUENTA_RID                     NUMBER(5,0)     NOT NULL,
+  COCINERO_PLATILLO_ID           NUMBER(10,0)    NOT NULL,
+  constraint PLATILLO_CUENTA_PK primary key(PLATILLO_CUENTA_ID)
+  using index
+  (
+    create unique index PLATILLO_CUENTA_PK on PLATILLO_CUENTA(PLATILLO_CUENTA_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT PLATILLO_CUENTA_COCINERO_PLATILLO_ID_FK FOREIGN KEY (COCINERO_PLATILLO_ID)
+  REFERENCES COCINERO_PLATILLO(COCINERO_PLATILLO_ID)
+)tablespace platillos_tbs;
+
+
+
+PROMPT CREANDO TABLA BEBIDA_CUENTA
+CREATE TABLE BEBIDA_CUENTA
+(
+  BEBIDA_CUENTA_ID                NUMBER(10,0),
+  CANTIDAD                        NUMBER(10,0)    NOT NULL,
+  CUENTA_RID                      NUMBER(5,0)     NOT NULL,
+  BARTENDER_BEBIDA_ID             NUMBER(10,0)    NOT NULL,
+  constraint BEBIDA_CUENTA_PK primary key(BEBIDA_CUENTA_ID)
+  using index
+  (
+    create unique index BEBIDA_CUENTA_PK on BEBIDA_CUENTA(BEBIDA_CUENTA_ID)
+    tablespace ix_consumibles_tbs
+  ),
+  CONSTRAINT BEBIDA_CUENTA_BARTENDER_BEBIDA_ID_FK FOREIGN KEY (BARTENDER_BEBIDA_ID)
+  REFERENCES BARTENDER_BEBIDA(BARTENDER_BEBIDA_ID)
+)tablespace bebidas_tbs;
+
+
+
+PROMPT CREANDO INDICES
+CREATE INDEX RECETA_NOMBRE_IX ON RECETA(NOMBRE)
+  tablespace ix_consumibles_tbs;
+
+CREATE INDEX PLATILLO_COSTO_IX ON PLATILLO(COSTO)
+  tablespace ix_consumibles_tbs;
+
+CREATE INDEX BEBIDA_COSTO_IX ON BEBIDA(COSTO)
+  tablespace ix_consumibles_tbs;
+
+CREATE INDEX PLATILLO_CUENTA_CUENTA_RID_IX ON PLATILLO_CUENTA(CUENTA_RID)
+  tablespace ix_consumibles_tbs;
+
+CREATE INDEX BARTENDER_BEBIDA_CUENTA_RID_IX ON BEBIDA_CUENTA(CUENTA_RID)
+  tablespace ix_consumibles_tbs;
